@@ -1,0 +1,51 @@
+<div class="feature-container">
+  <mat-card class="header-card">
+    <h1>AI-First Win-Back / Re-engage Campaigns</h1>
+    <p class="subtitle">Intelligent agents analyze release notes and engage dormant accounts autonomously</p>
+
+    <div class="stats-grid">
+      <app-stat-card 
+        icon="target_account" 
+        label="Win-Back Rate" 
+        [value]="stats.winbackRate"
+        color="#10b981">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="campaign" 
+        label="Active Campaigns" 
+        [value]="stats.activeCampaigns"
+        color="#667eea">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="speed" 
+        label="Automation Rate" 
+        [value]="stats.automationRate"
+        color="#f59e0b">
+      </app-stat-card>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <h3>Engagement Trends</h3>
+    <div class="chart-container">
+      <canvas baseChart
+              [data]="lineChartData"
+              [options]="lineChartOptions"
+              type="line">
+      </canvas>
+    </div>
+  </mat-card>
+
+  <app-loading *ngIf="isProcessing"></app-loading>
+
+  <button mat-raised-button 
+          color="primary" 
+          class="action-button"
+          [disabled]="isProcessing"
+          (click)="launchCampaign()">
+    <mat-icon>send</mat-icon>
+    Launch Win-Back Campaign
+  </button>
+</div>

@@ -1,0 +1,66 @@
+<div class="feature-container">
+  <mat-card class="header-card">
+    <h1>AI-Aided Insights & BI Generation</h1>
+    <p class="subtitle">GenAI-driven segmentation and automated insight generation from multiple sources</p>
+
+    <div class="stats-grid">
+      <app-stat-card 
+        icon="schedule" 
+        label="Time Saved" 
+        [value]="stats.timeSaved"
+        color="#667eea">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="trending_up" 
+        label="Engagement Rate" 
+        [value]="stats.engagementRate"
+        color="#10b981">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="assessment" 
+        label="Reports Generated" 
+        [value]="stats.reportsGenerated"
+        color="#f59e0b">
+      </app-stat-card>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <h3>Industry Engagement Scores</h3>
+    <div class="chart-container">
+      <canvas baseChart
+              [data]="barChartData"
+              [options]="barChartOptions"
+              type="bar">
+      </canvas>
+    </div>
+  </mat-card>
+
+  <mat-card class="insights-card">
+    <h3>Recent AI-Generated Insights</h3>
+    <div class="insights-list">
+      @for (insight of insights; track insight.title) {
+        <div class="insight-item">
+          <mat-icon color="primary">{{insight.icon}}</mat-icon>
+          <div class="insight-content">
+            <h4>{{insight.title}}</h4>
+            <p>{{insight.description}}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </mat-card>
+
+  <app-loading *ngIf="isProcessing"></app-loading>
+
+  <button mat-raised-button 
+          color="primary" 
+          class="action-button"
+          [disabled]="isProcessing"
+          (click)="generateInsights()">
+    <mat-icon>psychology</mat-icon>
+    Generate New Insights
+  </button>
+</div>

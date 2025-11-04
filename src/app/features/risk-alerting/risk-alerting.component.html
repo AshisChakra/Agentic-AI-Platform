@@ -1,0 +1,69 @@
+<div class="feature-container">
+  <mat-card class="header-card">
+    <h1>Pre-emptive/Predictive Risk Alerting Tool</h1>
+    <p class="subtitle">AI-powered risk detection with automated intervention recommendations</p>
+
+    <div class="stats-grid">
+      <app-stat-card 
+        icon="trending_up" 
+        label="Churn Reduction" 
+        [value]="stats.churnReduction"
+        color="#10b981">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="warning" 
+        label="High Risk Accounts" 
+        [value]="stats.highRiskAccounts"
+        color="#ef4444">
+      </app-stat-card>
+      
+      <app-stat-card 
+        icon="notifications_active" 
+        label="Interventions Today" 
+        [value]="stats.interventionsToday"
+        color="#f59e0b">
+      </app-stat-card>
+    </div>
+  </mat-card>
+
+  <div class="content-grid">
+    <mat-card class="chart-card">
+      <h3>Risk Distribution</h3>
+      <div class="chart-container">
+        <canvas baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                type="pie">
+        </canvas>
+      </div>
+    </mat-card>
+
+    <mat-card class="alerts-card">
+      <h3>Recent Alerts</h3>
+      <div class="alerts-list">
+        @for (alert of alerts; track alert.company) {
+          <div class="alert-item" [class.high-risk]="alert.level === 'high'" 
+                                  [class.medium-risk]="alert.level === 'medium'">
+            <mat-icon [color]="getRiskColor(alert.level)">{{alert.icon}}</mat-icon>
+            <div class="alert-content">
+              <h4>{{alert.company}} - <span class="risk-level">{{alert.level | titlecase}} Risk</span></h4>
+              <p>{{alert.message}}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+  <app-loading *ngIf="isProcessing"></app-loading>
+
+  <button mat-raised-button 
+          color="warn" 
+          class="action-button"
+          [disabled]="isProcessing"
+          (click)="runRiskAnalysis()">
+    <mat-icon>analytics</mat-icon>
+    Run Risk Analysis
+  </button>
+</div>

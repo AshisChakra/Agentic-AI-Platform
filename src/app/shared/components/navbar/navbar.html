@@ -1,0 +1,36 @@
+<mat-toolbar color="primary" class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <mat-icon class="brand-icon">psychology</mat-icon>
+      <div class="brand-text">
+        <h1>Agentic AI Platform</h1>
+        <span class="brand-subtitle">Powered by GPT-4o & LangChain</span>
+      </div>
+    </div>
+    
+    <div class="navbar-info">
+      <div class="deployment-info">
+        <span class="info-label">Model:</span>
+        <span class="info-value">gpt4o-cogito-dev</span>
+      </div>
+      <div class="deployment-info">
+        <span class="info-label">Embeddings:</span>
+        <span class="info-value">text-embedding-ada-002</span>
+      </div>
+    </div>
+  </div>
+</mat-toolbar>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="nav-tabs">
+  @for (link of navLinks; track link.path) {
+    <a mat-tab-link
+       [routerLink]="link.path"
+       routerLinkActive
+       #rla="routerLinkActive"
+       [active]="rla.isActive">
+      <mat-icon>{{link.icon}}</mat-icon>
+      {{link.label}}
+    </a>
+  }
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
