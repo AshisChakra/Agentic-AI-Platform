@@ -1,4 +1,4 @@
-<div class="feature-container">
+<!-- <div class="feature-container">
   <mat-card class="header-card">
     <h1>AI-Aided Insights & BI Generation</h1>
     <p class="subtitle">GenAI-driven segmentation and automated insight generation from multiple sources</p>
@@ -27,40 +27,273 @@
     </div>
   </mat-card>
 
-  <mat-card class="chart-card">
-    <h3>Industry Engagement Scores</h3>
-    <div class="chart-container">
-      <canvas baseChart
-              [data]="barChartData"
-              [options]="barChartOptions"
-              type="bar">
-      </canvas>
+  <mat-card class="search-card">
+    <h3>Industry & Region Search</h3>
+    <div class="search-form">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Industry</mat-label>
+        <input matInput 
+               [(ngModel)]="industry" 
+               placeholder="e.g., EV Two-Wheelers"
+               [disabled]="isSearching || isGeneratingAgentic">
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Search Query</mat-label>
+        <input matInput 
+               [(ngModel)]="searchQuery" 
+               placeholder="e.g., EV charging partnerships in India"
+               [disabled]="isSearching || isGeneratingAgentic">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Region</mat-label>
+        <input matInput 
+               [(ngModel)]="region" 
+               placeholder="e.g., India"
+               [disabled]="isSearching || isGeneratingAgentic">
+        <mat-icon matPrefix>public</mat-icon>
+      </mat-form-field>
+
+      <div class="button-group">
+        <button mat-raised-button 
+                color="primary" 
+                class="search-button"
+                [disabled]="isSearching || isGeneratingAgentic"
+                (click)="searchInsights()">
+          <mat-icon>search</mat-icon>
+          Search Insights
+        </button>
+
+        <button mat-raised-button 
+                color="accent" 
+                class="agentic-button"
+                [disabled]="isSearching || isGeneratingAgentic || searchResults.length === 0"
+                (click)="generateAgenticInsights()">
+          <mat-icon>psychology</mat-icon>
+          Agentic AI Insights
+        </button>
+      </div>
     </div>
   </mat-card>
 
-  <mat-card class="insights-card">
-    <h3>Recent AI-Generated Insights</h3>
-    <div class="insights-list">
-      @for (insight of insights; track insight.title) {
-        <div class="insight-item">
-          <mat-icon color="primary">{{insight.icon}}</mat-icon>
-          <div class="insight-content">
-            <h4>{{insight.title}}</h4>
-            <p>{{insight.description}}</p>
+
+  <app-loading *ngIf="isSearching"></app-loading>
+  
+
+  <mat-card class="results-card" *ngIf="searchResults.length > 0 && !isSearching">
+    <h3>Search Results ({{searchResults.length}})</h3>
+    <div class="results-list">
+      @for (result of searchResults; track result.url) {
+        <div class="result-item">
+          <div class="result-header">
+            <h4>{{result.title}}</h4>
+            <div class="result-badges">
+              <mat-chip-set>
+                <mat-chip class="trend-chip">{{result.trend}}</mat-chip>
+                <mat-chip [highlighted]="true" 
+                          [color]="getSentimentColor(result.sentiment)">
+                  <mat-icon>{{getSentimentIcon(result.sentiment)}}</mat-icon>
+                  {{result.sentiment}}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+          <p class="result-excerpt">{{result.excerpt}}</p>
+          <div class="result-footer">
+            <span class="result-source">
+              <mat-icon>article</mat-icon>
+              {{result.source}}
+            </span>
+            <a [href]="result.url" target="_blank" class="result-link">
+              <mat-icon>open_in_new</mat-icon>
+              Read More
+            </a>
           </div>
         </div>
       }
     </div>
   </mat-card>
 
-  <app-loading *ngIf="isProcessing"></app-loading>
 
-  <button mat-raised-button 
-          color="primary" 
-          class="action-button"
-          [disabled]="isProcessing"
-          (click)="generateInsights()">
-    <mat-icon>psychology</mat-icon>
-    Generate New Insights
-  </button>
+  <div *ngIf="isGeneratingAgentic" class="agentic-loading">
+    <app-loading></app-loading>
+    <p class="agentic-loading-text">Generating AI-powered insights...</p>
+  </div>
+
+
+  <mat-card class="agentic-card" *ngIf="agenticInsight && !isGeneratingAgentic">
+    <div class="agentic-header">
+      <mat-icon class="agentic-icon">auto_awesome</mat-icon>
+      <h3>{{agenticInsight.insight_card.title}}</h3>
+    </div>
+
+    <mat-expansion-panel class="insight-section" [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>lightbulb</mat-icon>
+          Key Developments
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ul class="bullet-list">
+        @for (bullet of agenticInsight.insight_card.bullets; track bullet) {
+          <li>{{bullet}}</li>
+        }
+      </ul>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel class="insight-section" [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>format_quote</mat-icon>
+          Key Quotes
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="quotes-list">
+        @for (quote of agenticInsight.insight_card.quotes; track quote.url) {
+          <div class="quote-item">
+            <p class="quote-text">"{{quote.quote}}"</p>
+            <div class="quote-meta">
+              <span class="quote-source">— {{quote.source}}</span>
+              <span class="quote-date">{{quote.date}}</span>
+              <a [href]="quote.url" target="_blank" class="quote-link">
+                <mat-icon>link</mat-icon>
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-expansion-panel>
+
+    <div class="why-matters">
+      <div class="why-matters-header">
+        <mat-icon>stars</mat-icon>
+        <strong>Why It Matters:</strong>
+      </div>
+      <p>{{agenticInsight.insight_card.why_it_matters}}</p>
+    </div>
+
+    <mat-expansion-panel class="insight-section">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>source</mat-icon>
+          Sources ({{agenticInsight.sources.length}})
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="sources-list">
+        @for (source of agenticInsight.sources; track source.url) {
+          <div class="source-item">
+            <div class="source-info">
+              <strong>{{source.title}}</strong>
+              <span class="source-meta">{{source.source}} • {{source.published_at}}</span>
+            </div>
+            <a [href]="source.url" target="_blank" mat-icon-button>
+              <mat-icon>open_in_new</mat-icon>
+            </a>
+          </div>
+        }
+      </div>
+    </mat-expansion-panel>
+  </mat-card>
+</div> -->
+
+
+<mat-card class="header-card">
+  <h1 class="page-title">AI-Aided Insights & BI Generation</h1>
+  <p class="subtitle">
+    GenAI-driven segmentation and automated insight generation from multiple
+    sources
+  </p>
+
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-icon matPrefix>business</mat-icon>
+      <input matInput placeholder="Industry" [(ngModel)]="industry" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Search Query" [(ngModel)]="searchQuery" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-icon matPrefix>public</mat-icon>
+      <input matInput placeholder="Region" [(ngModel)]="region" />
+    </mat-form-field>
+  </div>
+
+  <div class="button-group">
+    <button mat-raised-button color="primary" class="search-button" (click)="searchInsights()">
+      <mat-icon>search</mat-icon>
+      Search Insights
+    </button>
+
+    <button mat-raised-button color="accent" class="agentic-button" (click)="generateAgenticInsights()">
+      <mat-icon>psychology</mat-icon>
+      Agentic AI Insights
+    </button>
+  </div>
+</mat-card>
+
+<mat-card class="insights-card" *ngIf="agenticInsight">
+  <div class="insight-header">
+    <mat-icon>lightbulb</mat-icon>
+    <h2 class="insight-title">{{ agenticInsight.insight_card.title }}</h2>
+  </div>
+
+  <div class="why-it-matters" *ngIf="agenticInsight.insight_card.why_it_matters">
+    <strong>Why it matters:</strong>
+    <span>{{ agenticInsight.insight_card.why_it_matters }}</span>
+  </div>
+
+  <div class="stats-grid" *ngIf="insightBullets.length > 0">
+    <mat-card class="bullet-card" *ngFor="let b of insightBullets">
+      <div class="bullet-inner">
+        <mat-icon class="bullet-icon">flash_on</mat-icon>
+        <div class="bullet-text">{{ b }}</div>
+      </div>
+    </mat-card>
+  </div>
+
+  <mat-accordion class="quotes-accordion" *ngIf="agenticInsight.insight_card.quotes?.length">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>forum</mat-icon>
+          Key quoted excerpts ({{ agenticInsight.insight_card.quotes.length }})
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="quotes-list">
+        <div class="quote-item" *ngFor="let q of agenticInsight.insight_card.quotes">
+          <p class="quote-text">“{{ q.quote }}”</p>
+          <div class="quote-meta">
+            <span>{{ q.source }} · {{ q.date }}</span>
+            <a href="{{ q.url }}" target="_blank" rel="noopener">source ↗</a>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <div class="sources-grid" *ngIf="agenticInsight.sources?.length">
+    <h3 class="sources-title">Sources ({{ agenticInsight.sources.length }})</h3>
+    <div class="sources-list">
+      <mat-card class="source-card" *ngFor="let s of agenticInsight.sources">
+        <div class="source-info">
+          <div class="source-title">{{ s.title }}</div>
+          <div class="source-meta">{{ s.source }} · {{ s.published_at }}</div>
+        </div>
+        <a class="open-link" href="{{ s.url }}" target="_blank" rel="noopener">Open ↗</a>
+      </mat-card>
+    </div>
+  </div>
+</mat-card>
+
+<div *ngIf="!agenticInsight" class="empty-placeholder">
+  <p>
+    Click <strong>Agentic AI Insights</strong> to load insights (mock data for UI test).
+  </p>
 </div>
